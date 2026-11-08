@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="primefaces">
+
+    <!-- Inhalt für den Platzhalter "content" aus layout.xhtml -->
+    <ui:define name="content">
+        <h2>Pressemitteilungen</h2>
+
+        <h:form>
+            <!-- Filterbereich: Auswahl eines Status -->
+            <div class="panel">
+                <div class="inline-form">
+                    <div class="form-field">
+                        <h:outputLabel for="statusFilter" value="Status filtern" />
+                        <h:selectOneMenu id="statusFilter" value="#{releaseListBean.statusFilter}">
+                            <f:selectItem itemLabel="Alle" itemValue="#{null}" />
+                            <f:selectItems value="#{releaseListBean.statuses}" var="status"
+                                           itemValue="#{status}" itemLabel="#{status.label}" />
+                        </h:selectOneMenu>
+                    </div>
+                    <div class="form-field">
+                        <p:commandButton value="Liste aktualisieren" styleClass="btn" ajax="false" />
+                    </div>
+                    <div class="form-field">
+                        <h:link outcome="/release.xhtml" value="+ Neue Pressemitteilung" styleClass="btn"
+                                rendered="#{releaseListBean.canCreate}" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Übersichtstabelle: alle (gefilterten) Pressemitteilungen -->
+            <div class="panel">
+                <h:outputText value="Es sind keine Pressemitteilungen vorhanden."
+                              rendered="#{empty releaseListBean.releases}" />
+
+                <h:dataTable value="#{releaseListBean.releases}" var="release" styleClass="data-table"
+                             rendered="#{not empty releaseListBean.releases}">
+                    <h:column>
+                        <f:facet name="header">ID</f:facet>
+                        #{release.id}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Titel</f:facet>
+                        <h:link outcome="/release.xhtml" value="#{release.title}">
+                            <f:param name="id" value="#{release.id}" />
+                        </h:link>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Status</f:facet>
+                        <span class="status status-#{release.status}">#{release.status.label}</span>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Redaktion</f:facet>
+                        #{release.author.fullName}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Fachprüfung</f:facet>
+                        #{release.reviewer.nameWithDepartment}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Zuletzt geändert</f:facet>
+                        <h:outputText value="#{release.updatedAt}">
+                            <f:convertDateTime type="localDateTime" pattern="dd.MM.yyyy HH:mm" />
+                        </h:outputText>
+                    </h:column>
+                </h:dataTable>
+            </div>
+        </h:form>
+    </ui:define>
+</ui:composition>

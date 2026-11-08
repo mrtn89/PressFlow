@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:p="primefaces">
+
+<f:view>
+    <!-- Platzhalter für Seitenparameter (z. B. die ID auf der Detailseite) -->
+    <ui:insert name="metadata" />
+
+    <!-- Kopf aller Seiten: Titel, CSS -->
+    <h:head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>PressFlow</title>
+        <h:outputStylesheet library="css" name="style.css" />
+    </h:head>
+
+    <h:body>
+        <div id="holder">
+            <!-- Header: Logo und angemeldete Person -->
+            <header>
+                <div class="callout">PressFlow</div>
+                <h:form styleClass="user-box">
+                    <span>
+                        Angemeldet als <strong>#{loginBean.currentUser.fullName}</strong>
+                        (#{loginBean.currentUser.role.label})
+                    </span>
+                    <p:commandButton value="Abmelden" action="#{loginBean.logout}" styleClass="btn" ajax="false" />
+                </h:form>
+            </header>
+
+            <!-- Navigation: Einträge abhängig von der Rolle -->
+            <nav>
+                <ul>
+                    <li><h:link outcome="/overview.xhtml" value="Übersicht" /></li>
+                    <li><h:link outcome="/releases.xhtml" value="Pressemitteilungen" /></li>
+                    <li><h:link outcome="/release.xhtml" value="Neue Pressemitteilung"
+                                rendered="#{loginBean.hasRole('REDAKTEUR') or loginBean.admin}" /></li>
+                    <li><h:link outcome="/users.xhtml" value="Benutzer:innen" rendered="#{loginBean.admin}" /></li>
+                </ul>
+            </nav>
+
+            <!-- Hauptbereich: Meldungen und Platzhalter für den Seiteninhalt -->
+            <main>
+                <p:messages id="messages" showDetail="false" closable="true" />
+
+                <!-- Hier fügt jede Seite ihren Inhalt über <ui:define name="content"> ein -->
+                <ui:insert name="content" />
+            </main>
+
+            <!-- Footer -->
+            <footer>IU14141637 | Martin Funke</footer>
+        </div>
+    </h:body>
+</f:view>
+</html>

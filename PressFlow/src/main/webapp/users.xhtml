@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="primefaces">
+
+    <!-- Inhalt für den Platzhalter "content" aus layout.xhtml (nur für Administration, siehe AuthenticationFilter) -->
+    <ui:define name="content">
+        <h2>Benutzer:innen</h2>
+
+        <h:form>
+            <!-- Erfassungsformular: neue Person anlegen -->
+            <div class="panel">
+                <div class="form-grid">
+                    <div class="form-field">
+                        <h:outputLabel for="username" value="Benutzername" />
+                        <h:inputText id="username" value="#{userPageBean.user.username}" required="true" maxlength="50"
+                                     requiredMessage="Bitte geben Sie einen Benutzernamen ein." />
+                    </div>
+                    <div class="form-field">
+                        <h:outputLabel for="fullName" value="Name" />
+                        <h:inputText id="fullName" value="#{userPageBean.user.fullName}" required="true" maxlength="100"
+                                     requiredMessage="Bitte geben Sie einen Namen ein." />
+                    </div>
+                    <div class="form-field">
+                        <h:outputLabel for="department" value="Abteilung" />
+                        <h:inputText id="department" value="#{userPageBean.user.department}" maxlength="100" />
+                    </div>
+                    <div class="form-field">
+                        <h:outputLabel for="role" value="Rolle" />
+                        <h:selectOneMenu id="role" value="#{userPageBean.user.role}">
+                            <f:selectItems value="#{userPageBean.roles}" var="role" itemValue="#{role}" itemLabel="#{role.label}" />
+                        </h:selectOneMenu>
+                    </div>
+                    <div class="form-field">
+                        <h:outputLabel for="password" value="Startpasswort (mind. 8 Zeichen)" />
+                        <h:inputSecret id="password" value="#{userPageBean.password}" required="true"
+                                       requiredMessage="Bitte geben Sie ein Startpasswort ein." />
+                    </div>
+                </div>
+                <p:commandButton value="Benutzer:in anlegen" action="#{userPageBean.save}" styleClass="btn" ajax="false" />
+            </div>
+
+            <!-- Übersichtstabelle: alle Personen -->
+            <div class="panel">
+                <h:dataTable value="#{userPageBean.users}" var="user" styleClass="data-table">
+                    <h:column>
+                        <f:facet name="header">Benutzername</f:facet>
+                        #{user.username}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Name</f:facet>
+                        #{user.fullName}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Abteilung</f:facet>
+                        #{user.department}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Rolle</f:facet>
+                        <span class="tag">#{user.role.label}</span>
+                    </h:column>
+                </h:dataTable>
+            </div>
+        </h:form>
+    </ui:define>
+</ui:composition>

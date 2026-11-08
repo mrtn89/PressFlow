@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="primefaces">
+
+<!-- Eigenständige Seite ohne Navigation, da noch niemand angemeldet ist -->
+<h:head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PressFlow – Anmeldung</title>
+    <h:outputStylesheet library="css" name="style.css" />
+</h:head>
+
+<h:body>
+    <div class="login-box">
+        <div class="callout">PressFlow</div>
+        <p class="login-subtitle">Pressemitteilungen gemeinsam erstellen und freigeben</p>
+
+        <p:messages showDetail="false" closable="true" />
+
+        <h:form id="loginForm">
+            <div class="form-field">
+                <h:outputLabel for="username" value="Benutzername" />
+                <h:inputText id="username" value="#{loginBean.username}" required="true"
+                             requiredMessage="Bitte geben Sie Ihren Benutzernamen ein." />
+            </div>
+            <div class="form-field">
+                <h:outputLabel for="password" value="Passwort" />
+                <h:inputSecret id="password" value="#{loginBean.password}" required="true"
+                               requiredMessage="Bitte geben Sie Ihr Passwort ein." />
+            </div>
+            <p:commandButton value="Anmelden" action="#{loginBean.login}" styleClass="btn btn-primary" ajax="false" />
+        </h:form>
+
+        <!-- Hinweis für den Prototyp: Demo-Zugänge werden beim ersten Login automatisch angelegt -->
+        <div class="info-box">
+            Demo-Zugänge (Passwort jeweils <strong>pressflow</strong>):
+            redakteur, fachpruefer, fachpruefer2, pressesprecher, admin
+        </div>
+    </div>
+</h:body>
+</html>
