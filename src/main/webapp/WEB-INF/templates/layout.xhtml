@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:p="primefaces">
+
+<f:view>
+    <!-- Platzhalter für Seitenparameter (z. B. die ID auf der Detailseite) -->
+    <ui:insert name="metadata" />
+
+    <!-- Kopf aller Seiten: Titel, CSS -->
+    <h:head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>PressFlow</title>
+        <h:outputStylesheet library="css" name="style.css" />
+    </h:head>
+
+    <h:body>
+        <!-- Kopfleiste: Schriftzug und angemeldete Person -->
+        <header class="topbar">
+            <div class="wordmark">PressFlow</div>
+            <h:form styleClass="user-box">
+                <span class="user-name">#{loginBean.currentUser.fullName}</span>
+                <span class="user-role">#{loginBean.currentUser.role.label}</span>
+                <p:commandButton value="Abmelden" action="#{loginBean.logout}" styleClass="btn" ajax="false" />
+            </h:form>
+        </header>
+
+        <div class="shell">
+            <!-- Navigation: Einträge abhängig von der Rolle, die aktuelle Seite wird markiert -->
+            <nav class="sidebar">
+                <ul>
+                    <li>
+                        <h:link outcome="/overview.xhtml" value="Übersicht"
+                                styleClass="#{view.viewId eq '/overview.xhtml' ? 'active' : ''}" />
+                    </li>
+                    <li>
+                        <h:link outcome="/releases.xhtml" value="Pressemitteilungen"
+                                styleClass="#{view.viewId eq '/releases.xhtml' or (view.viewId eq '/release.xhtml' and not empty param.id) ? 'active' : ''}" />
+                    </li>
+                    <ui:fragment rendered="#{loginBean.hasRole('REDAKTEUR') or loginBean.admin}">
+                        <li>
+                            <h:link outcome="/release.xhtml" value="Neue Pressemitteilung"
+                                    styleClass="#{view.viewId eq '/release.xhtml' and empty param.id ? 'active' : ''}" />
+                        </li>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{loginBean.admin}">
+                        <li>
+                            <h:link outcome="/users.xhtml" value="Benutzer:innen"
+                                    styleClass="#{view.viewId eq '/users.xhtml' ? 'active' : ''}" />
+                        </li>
+                    </ui:fragment>
+                </ul>
+            </nav>
+
+            <!-- Hauptbereich: Meldungen und Platzhalter für den Seiteninhalt -->
+            <main>
+                <div class="content">
+                    <p:messages id="messages" showDetail="false" closable="true" />
+
+                    <!-- Hier fügt jede Seite ihren Inhalt über <ui:define name="content"> ein -->
+                    <ui:insert name="content" />
+                </div>
+            </main>
+        </div>
+
+        <!-- Footer -->
+        <footer>IU14141637 | Martin Funke</footer>
+    </h:body>
+</f:view>
+</html>

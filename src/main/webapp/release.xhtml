@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="primefaces">
+
+    <!-- Seitenparameter: release.xhtml?id=5 lädt die Pressemitteilung mit der ID 5 -->
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{releaseDetailBean.releaseId}" />
+            <f:viewAction action="#{releaseDetailBean.load}" />
+        </f:metadata>
+    </ui:define>
+
+    <!-- Inhalt für den Platzhalter "content" aus layout.xhtml -->
+    <ui:define name="content">
+        <ui:fragment rendered="#{releaseDetailBean.loaded}">
+            <!-- Titel einer bestehenden Pressemitteilung in der Dokumentschrift (Klasse release-title) -->
+            <h2 class="#{releaseDetailBean.newRelease ? '' : 'release-title'}">#{releaseDetailBean.newRelease ? 'Neue Pressemitteilung' : releaseDetailBean.release.title}</h2>
+
+            <!-- Kopfdaten: Status und Beteiligte -->
+            <ui:fragment rendered="#{not releaseDetailBean.newRelease}">
+                <div class="panel meta">
+                    <span class="status status-#{releaseDetailBean.release.status}">#{releaseDetailBean.release.status.label}</span>
+                    <span><strong>Redaktion:</strong> #{releaseDetailBean.release.author.fullName}</span>
+                    <span><strong>Fachprüfung:</strong>
+                        #{empty releaseDetailBean.release.reviewer ? 'noch nicht zugewiesen' : releaseDetailBean.release.reviewer.nameWithDepartment}</span>
+                    <span><strong>Zuletzt geändert:</strong>
+                        <h:outputText value="#{releaseDetailBean.release.updatedAt}">
+                            <f:convertDateTime type="localDateTime" pattern="dd.MM.yyyy HH:mm" />
+                        </h:outputText>
+                    </span>
+                </div>
+            </ui:fragment>
+
+            <!-- Bearbeitungsformular: nur sichtbar, wenn die Person bearbeiten darf -->
+            <h:form id="contentForm" rendered="#{releaseDetailBean.canEdit}">
+                <div class="panel">
+                    <div class="form-field">
+                        <h:outputLabel for="title" value="Überschrift" />
+                        <h:inputText id="title" value="#{releaseDetailBean.release.title}" required="true" maxlength="200"
+                                     requiredMessage="Bitte geben Sie eine Überschrift ein." />
+                    </div>
+                    <div class="form-field">
+                        <h:outputLabel for="lead" value="Lead (kurze Zusammenfassung der Kernaussage)" />
+                        <h:inputTextarea id="lead" value="#{releaseDetailBean.release.lead}" rows="3" />
+                    </div>
+                    <div class="form-field">
+                        <h:outputLabel for="body" value="Text (Absätze durch eine Leerzeile trennen)" />
+                        <h:inputTextarea id="body" value="#{releaseDetailBean.release.body}" required="true" styleClass="body-input"
+                                         requiredMessage="Bitte geben Sie den Text der Pressemitteilung ein." />
+                    </div>
+                    <p:commandButton value="#{releaseDetailBean.newRelease ? 'Entwurf anlegen' : 'Änderungen speichern'}"
+                                     action="#{releaseDetailBean.save}" styleClass="btn" ajax="false" />
+                </div>
+            </h:form>
+
+            <!-- Leseansicht: für alle, die nicht bearbeiten dürfen -->
+            <ui:fragment rendered="#{not releaseDetailBean.canEdit and not releaseDetailBean.newRelease}">
+                <div class="panel preview">
+                    <h3>#{releaseDetailBean.release.title}</h3>
+                    <p class="lead">#{releaseDetailBean.release.lead}</p>
+                    <div class="body-text">#{releaseDetailBean.release.body}</div>
+                </div>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{releaseDetailBean.newRelease and not releaseDetailBean.canEdit}">
+                <div class="panel">Nur die Redaktion kann neue Pressemitteilungen anlegen.</div>
+            </ui:fragment>
+
+            <!-- Freigabeprozess: zeigt nur die Schritte, die die Person aktuell ausführen darf -->
+            <h:form id="workflowForm" rendered="#{releaseDetailBean.workflowActionAvailable}">
+                <div class="panel workflow">
+                    <h2>Nächster Schritt</h2>
+
+                    <h:panelGroup layout="block" styleClass="form-field" rendered="#{releaseDetailBean.canSubmit}">
+                        <h:outputLabel for="reviewer" value="Fachprüfer:in" />
+                        <h:selectOneMenu id="reviewer" value="#{releaseDetailBean.reviewerId}">
+                            <f:selectItem itemLabel="– bitte auswählen –" itemValue="#{null}" />
+                            <f:selectItems value="#{releaseDetailBean.reviewers}" var="reviewer"
+                                           itemValue="#{reviewer.id}" itemLabel="#{reviewer.nameWithDepartment}" />
+                        </h:selectOneMenu>
+                    </h:panelGroup>
+
+                    <div class="form-field">
+                        <h:outputLabel for="note" value="Anmerkung (Pflicht bei „Überarbeitung anfordern“)" />
+                        <h:inputTextarea id="note" value="#{releaseDetailBean.workflowNote}" rows="3" />
+                    </div>
+
+                    <div class="action-bar">
+                        <p:commandButton value="Zur Fachprüfung einreichen" action="#{releaseDetailBean.submitForReview}"
+                                         rendered="#{releaseDetailBean.canSubmit}" styleClass="btn btn-primary" ajax="false" />
+                        <p:commandButton value="Fachlich korrekt – an Pressestelle" action="#{releaseDetailBean.confirmReview}"
+                                         rendered="#{releaseDetailBean.canReview}" styleClass="btn btn-primary" ajax="false" />
+                        <p:commandButton value="Freigeben" action="#{releaseDetailBean.approve}"
+                                         rendered="#{releaseDetailBean.canApprove}" styleClass="btn btn-primary" ajax="false" />
+                        <p:commandButton value="Überarbeitung anfordern" action="#{releaseDetailBean.requestRevision}"
+                                         rendered="#{releaseDetailBean.canRequestRevision}" styleClass="btn" ajax="false" />
+                    </div>
+                </div>
+            </h:form>
+
+            <!-- Export: nur für freigegebene Pressemitteilungen -->
+            <h:form id="exportForm" rendered="#{releaseDetailBean.canExport}">
+                <div class="panel">
+                    <h2>Ergebnis</h2>
+                    <p>
+                        Freigegeben am
+                        <h:outputText value="#{releaseDetailBean.release.approvedAt}">
+                            <f:convertDateTime type="localDateTime" pattern="dd.MM.yyyy HH:mm" />
+                        </h:outputText>.
+                        Die Word-Datei kann individuell weiterformatiert werden.
+                    </p>
+                    <p:commandButton value="Word-Datei herunterladen" action="#{releaseDetailBean.exportWord}"
+                                     styleClass="btn btn-primary" ajax="false" />
+                </div>
+            </h:form>
+
+            <!-- Kommentare: Austausch zwischen Redaktion, Fachabteilung und Pressestelle -->
+            <ui:fragment rendered="#{not releaseDetailBean.newRelease}">
+                <div class="panel">
+                    <h2>Kommentare</h2>
+                    <h:outputText value="Noch keine Kommentare." rendered="#{empty releaseDetailBean.comments}" />
+                    <ui:repeat value="#{releaseDetailBean.comments}" var="comment">
+                        <div class="comment">
+                            <div class="comment-meta">
+                                <strong>#{comment.author.fullName}</strong> (#{comment.author.role.label}),
+                                <h:outputText value="#{comment.createdAt}">
+                                    <f:convertDateTime type="localDateTime" pattern="dd.MM.yyyy HH:mm" />
+                                </h:outputText>
+                            </div>
+                            <div class="comment-text">#{comment.text}</div>
+                        </div>
+                    </ui:repeat>
+
+                    <h:form id="commentForm">
+                        <div class="form-field">
+                            <h:outputLabel for="newComment" value="Neuer Kommentar" />
+                            <h:inputTextarea id="newComment" value="#{releaseDetailBean.newComment}" rows="3" />
+                        </div>
+                        <p:commandButton value="Kommentar speichern" action="#{releaseDetailBean.addComment}"
+                                         styleClass="btn" ajax="false" />
+                    </h:form>
+                </div>
+
+                <!-- Statushistorie: wer hat wann welchen Schritt ausgeführt -->
+                <div class="panel">
+                    <h2>Verlauf</h2>
+                    <h:dataTable value="#{releaseDetailBean.history}" var="change" styleClass="data-table">
+                        <h:column>
+                            <f:facet name="header">Zeitpunkt</f:facet>
+                            <h:outputText value="#{change.changedAt}">
+                                <f:convertDateTime type="localDateTime" pattern="dd.MM.yyyy HH:mm" />
+                            </h:outputText>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Status</f:facet>
+                            <h:outputText value="#{change.oldStatus.label} → " rendered="#{not empty change.oldStatus}" />#{change.newStatus.label}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Durch</f:facet>
+                            #{change.changedBy.fullName}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Anmerkung</f:facet>
+                            #{change.note}
+                        </h:column>
+                    </h:dataTable>
+                </div>
+            </ui:fragment>
+        </ui:fragment>
+    </ui:define>
+</ui:composition>

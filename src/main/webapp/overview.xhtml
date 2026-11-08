@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets">
+
+    <!-- Inhalt für den Platzhalter "content" aus layout.xhtml -->
+    <ui:define name="content">
+        <h2>Übersicht</h2>
+
+        <!-- Ablaufleiste: Anzahl der Pressemitteilungen je Schritt des Freigabeprozesses -->
+        <ol class="pipeline">
+            <ui:repeat value="#{overviewBean.statuses}" var="status">
+                <li class="pipeline-step status-#{status}">
+                    <span class="pipeline-count">#{overviewBean.countByStatus(status)}</span>
+                    <span class="pipeline-label">#{status.label}</span>
+                </li>
+            </ui:repeat>
+        </ol>
+
+        <!-- Offene Aufgaben der angemeldeten Person -->
+        <div class="panel">
+            <h2>Meine Aufgaben</h2>
+            <p class="hint">#{overviewBean.taskHint}</p>
+
+            <h:outputText value="Aktuell liegen keine Aufgaben für Sie vor."
+                          rendered="#{empty overviewBean.myTasks}" />
+
+            <h:dataTable value="#{overviewBean.myTasks}" var="release" styleClass="data-table"
+                         rendered="#{not empty overviewBean.myTasks}">
+                <h:column>
+                    <f:facet name="header">Titel</f:facet>
+                    <h:link outcome="/release.xhtml" value="#{release.title}">
+                        <f:param name="id" value="#{release.id}" />
+                    </h:link>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Status</f:facet>
+                    <span class="status status-#{release.status}">#{release.status.label}</span>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Redaktion</f:facet>
+                    #{release.author.fullName}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Zuletzt geändert</f:facet>
+                    <h:outputText value="#{release.updatedAt}">
+                        <f:convertDateTime type="localDateTime" pattern="dd.MM.yyyy HH:mm" />
+                    </h:outputText>
+                </h:column>
+            </h:dataTable>
+        </div>
+
+        <!-- Kurze Erklärung des Freigabeprozesses -->
+        <div class="panel">
+            <h2>Freigabeprozess</h2>
+            <ol class="process">
+                <li><strong>Entwurf:</strong> Die Redaktion erstellt die Pressemitteilung.</li>
+                <li><strong>In Prüfung:</strong> Eine Fachabteilung prüft die sachliche Richtigkeit.</li>
+                <li><strong>Überarbeitung:</strong> Bei Änderungswünschen geht die Mitteilung zurück an die Redaktion.</li>
+                <li><strong>Zur Freigabe:</strong> Die Pressestelle prüft die fachlich bestätigte Fassung.</li>
+                <li><strong>Freigegeben:</strong> Die Mitteilung kann als Word-Datei exportiert werden.</li>
+            </ol>
+        </div>
+    </ui:define>
+</ui:composition>
