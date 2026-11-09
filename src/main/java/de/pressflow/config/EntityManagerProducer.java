@@ -12,7 +12,7 @@ import java.io.Serializable;
 
 /**
  * Stellt per CDI einen EntityManager pro Request bereit.
- * Übernommen aus Require4Testing und auf den jakarta-Namespace umgestellt.
+ * Der EntityManager wird nach Ende des Requests automatisch geschlossen.
  */
 @ApplicationScoped
 public class EntityManagerProducer implements Serializable {

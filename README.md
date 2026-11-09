@@ -1,7 +1,7 @@
 # PressFlow
 
 Interne Webanwendung zur kollaborativen Erstellung und Freigabe von Pressemitteilungen.
-Basiert auf der Architektur von Require4Testing und modernisiert deren Stack:
+Umgesetzt als klassische Drei-Schichten-Anwendung (Modell, Services, Oberfläche) mit folgendem Stack:
 Java 21, Jakarta EE 10 (Faces 4, CDI 4, Persistence 3.1), PrimeFaces 15, Hibernate 6, MySQL 8, Apache TomEE 10, Maven.
 
 ## Freigabeprozess
@@ -39,7 +39,7 @@ Entwurf → In Prüfung → Zur Freigabe → Freigegeben → Word-Export
 - `src/main/java/de/pressflow/service`: Datenzugriff, Freigaberegeln (`WorkflowService`), Word-Export
 - `src/main/java/de/pressflow/view`: CDI-/JSF-Beans für die Seiten
 - `src/main/java/de/pressflow/security`: Login-Filter und Passwort-Hashing
-- `src/main/java/de/pressflow/config`: `EntityManagerProducer` (aus Require4Testing übernommen)
+- `src/main/java/de/pressflow/config`: `EntityManagerProducer` (stellt den EntityManager per CDI bereit)
 - `src/main/webapp`: XHTML-Seiten, Facelets-Template, CSS
 - `src/test/java`: Unit-Tests (JUnit 5) für Freigaberegeln, Passwort-Hashing und Word-Export
 - `sql/create-database.sql`: Datenbank und Datenbankbenutzer anlegen
@@ -65,9 +65,15 @@ Beim ersten Login werden automatisch Demo-Benutzer:innen angelegt (Passwort jewe
 | pressesprecher | Sabine Krämer | Pressesprecher:in |
 | admin | Administrator | Administrator:in |
 
-## Unterschiede zu Require4Testing
+## Technische Besonderheiten
 
-- `javax.*` → `jakarta.*`, Java 8 → Java 21, `Date` → `LocalDateTime`
-- Einfacher Login mit gehashten Passwörtern ersetzt die Rollenauswahl
+- Zeitangaben mit `LocalDateTime` (Java-Time-API)
+- Einfacher Login mit Passwort-Hashing (PBKDF2) und einem Filter, der alle Seiten schützt
 - `AbstractService` kapselt Transaktionen inkl. Rollback
 - Eigener Datenbankbenutzer statt `root`
+
+## Design (Version 2)
+
+- Schriften: IBM Plex Sans für die Oberfläche, Source Serif 4 für die Pressemitteilung selbst
+- Schriften liegen lokal unter `src/main/webapp/resources/fonts` (SIL Open Font License, Lizenztexte im selben Ordner)
+- Farben und Schriften sind zentral am Anfang von `style.css` als CSS-Variablen definiert

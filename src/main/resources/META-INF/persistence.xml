@@ -4,7 +4,7 @@
              xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
              version="3.0">
 
-    <!-- Anwendungsverwaltete Persistence Unit, wie in Require4Testing (siehe EntityManagerProducer) -->
+    <!-- Anwendungsverwaltete Persistence Unit (siehe EntityManagerProducer) -->
     <persistence-unit name="pressflowPU" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 

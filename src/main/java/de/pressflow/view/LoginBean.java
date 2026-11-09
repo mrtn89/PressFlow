@@ -13,7 +13,7 @@ import java.io.Serializable;
 
 /**
  * Session-Bean für die Anmeldung.
- * Ersetzt die Rollenauswahl aus Require4Testing durch einen einfachen Login
+ * Prüft die Zugangsdaten beim Login
  * und hält die angemeldete Person für die Dauer der Sitzung.
  */
 @Named
