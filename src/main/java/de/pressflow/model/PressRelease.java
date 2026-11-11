@@ -35,9 +35,11 @@ public class PressRelease implements Serializable {
     @Column(name = "lead_text", length = 1000)
     private String lead;
 
-    // Haupttext; Absätze werden durch Leerzeilen getrennt
+    // Haupttext; Absätze werden durch Leerzeilen getrennt.
+    // Die Länge muss angegeben werden: Ohne Angabe legt Hibernate unter MySQL nur eine
+    // TINYTEXT-Spalte (255 Zeichen) an. Ab 65.536 Zeichen wird daraus MEDIUMTEXT.
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100_000)
     private String body;
 
     // Aktueller Status im Freigabeprozess
